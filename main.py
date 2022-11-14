@@ -26,5 +26,6 @@ def graph(data):
 if __name__ == '__main__':
     # n = 100
     # print(int(math.sqrt(n)))
-    abc = [i for i in range(1, 11)]
-    print(abc)
+    # abc = [i for i in range(1, 11)]
+    # print(abc)
+    print('k =', 1, ', b =', 5)
