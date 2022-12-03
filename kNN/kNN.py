@@ -4,8 +4,8 @@ import operator
 import matplotlib.pyplot as plt
 
 
-def read_data():
-    return pd.read_csv('Iris.csv')
+def read_data(filename):
+    return pd.read_csv(filename)
 
 
 def divide_dataset(data):
@@ -76,8 +76,71 @@ def set_obs_k(k_count, data, dev_data, test_list, mean, std):
     return set_obs_k
 
 
+def calc_accuracy(data_class, set_obs_k):
+    accuracy = {}
+    for k in set_obs_k.keys():
+        count = 0
+        for i, j in zip(data_class, set_obs_k[k]):
+            if i == j:
+                count = count + 1
+            else:
+                pass
+        accuracy[k] = count / len(data_class)
+    return accuracy
+
+
+def draw_plot(dataset, att1, att2):
+    for index, row in dataset.iterrows():
+        color = 'r'
+        if row.Species == 'Iris-versicolor':
+            color = 'g'
+        elif row.Species == 'Iris-virginica':
+            color = 'b'
+        plt.scatter(row[att1], row[att2], color=color)
+    plt.xlabel(att1)
+    plt.ylabel(att2)
+    plt.suptitle('Данные до нормализации')
+    plt.title('r - "Iris-setosa", g - "Iris-versicolor", b - "Iris-virginica"')
+    plt.show()
+
+
+def show_dataset(dataset):
+    draw_plot(dataset, 'SepalLengthCm', 'SepalWidthCm')
+    draw_plot(dataset, 'SepalLengthCm', 'PetalLengthCm')
+    draw_plot(dataset, 'SepalLengthCm', 'PetalWidthCm')
+    draw_plot(dataset, 'SepalWidthCm', 'PetalLengthCm')
+    draw_plot(dataset, 'SepalWidthCm', 'PetalWidthCm')
+    draw_plot(dataset, 'PetalLengthCm', 'PetalWidthCm')
+
+
+def draw_plot_normalized(dataset, att1, att2, mean, std):
+    for index, row in dataset.iterrows():
+        color = 'r'
+        if row.Species == 'Iris-versicolor':
+            color = 'g'
+        elif row.Species == 'Iris-virginica':
+            color = 'b'
+        x = (row[att1] - mean[att1]) / std[att1]
+        y = (row[att2] - mean[att2]) / std[att2]
+        plt.scatter(x, y, color=color)
+    plt.xlabel(att1)
+    plt.ylabel(att2)
+    plt.suptitle('Данные после нормализации')
+    plt.title('r - "Iris-setosa", g - "Iris-versicolor", b - "Iris-virginica"')
+    plt.show()
+
+
+def show_dataset_normalized(dataset, mean, std):
+    draw_plot_normalized(dataset, 'SepalLengthCm', 'SepalWidthCm', mean, std)
+    draw_plot_normalized(dataset, 'SepalLengthCm', 'PetalLengthCm', mean, std)
+    draw_plot_normalized(dataset, 'SepalLengthCm', 'PetalWidthCm', mean, std)
+    draw_plot_normalized(dataset, 'SepalWidthCm', 'PetalLengthCm', mean, std)
+    draw_plot_normalized(dataset, 'SepalWidthCm', 'PetalWidthCm', mean, std)
+    draw_plot_normalized(dataset, 'PetalLengthCm', 'PetalWidthCm', mean, std)
+
+
 if __name__ == '__main__':
-    data = read_data()
+    data = read_data('Iris.csv')
 
     divided_dataset = divide_dataset(data)
     development_set = divided_dataset[0]
@@ -86,40 +149,29 @@ if __name__ == '__main__':
     test_list = row_list(test_set)
 
     mean = data.mean(numeric_only=True)
-    std = data.mean(numeric_only=True)
+    std = data.std(numeric_only=True)
+
+    show_dataset(data)
+    show_dataset_normalized(data, mean, std)
 
     k_count = int(np.sqrt(len(data) + 1))
-    test_set_obs_k = set_obs_k(30, data, development_set, test_list, mean, std)
-    # test_set_obs_k = {}
-    # for k in range(1, k_count):
-    #     test_set_obs = []
-    #     for i in range(len(test_list)):
-    #         test_set_obs.append(
-    #             knn(data, development_set, test_list[i], k, mean, std)
-    #         )
-    #     test_set_obs_k[k] = test_set_obs
+    test_set_obs_k = set_obs_k(k_count, data, development_set, test_list, mean, std)
 
     test_class = list(test_set.iloc[:, -1])
-    accuracy = {}
+    accuracy = calc_accuracy(test_class, test_set_obs_k)
 
-    for k in test_set_obs_k.keys():
-        count = 0
-        for i,j in zip(test_class, test_set_obs_k[k]):
-            if i == j:
-                count = count + 1
-            else:
-                pass
-        accuracy[k] = count / len(test_class)
-
-    for k in accuracy.keys():
-        print('k =', k, ', accuracy =', accuracy[k])
+    # for k in accuracy.keys():
+    #     print('k =', k, ', accuracy =', accuracy[k])
 
     best_accuracy = max(accuracy.items(), key=operator.itemgetter(1))
     best_k = best_accuracy[0]
-    print(best_k)
+    print('best k =', best_k)
 
-
-
+    test_data = read_data('test.csv')
+    test_data_list = row_list(test_data)
+    for i in range(len(test_data_list)):
+        test_knn = knn(data, development_set, test_data_list[i], best_k, mean, std)
+        print(test_knn)
 
 
 
