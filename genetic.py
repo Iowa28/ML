@@ -88,7 +88,7 @@ def solve_diophantine_equation(coefs, result, population_count):
 
     solution = fitness(organisms, coefs, result)
     iterations = 0
-    iterations_max = 1500
+    iterations_max = 3000
 
     while not solution and iterations < iterations_max:
         organisms = generate_likelihoods(organisms)
@@ -97,19 +97,19 @@ def solve_diophantine_equation(coefs, result, population_count):
         iterations += 1
 
     if solution:
-        print('SOLUTION FOUND IN %s ITERATIONS' % iterations)
+        # print('SOLUTION FOUND IN %s ITERATIONS' % iterations)
         return solution.alleles
     else:
-        print('SOLUTION NOT FOUND')
-        for organism in organisms:
-            print(organism.to_string())
+        print('solution not found')
+        # for organism in organisms:
+        #     print(organism.to_string())
 
         return -1
 
 
 if __name__ == '__main__':
     coefs = [1, 2, 3, 4, 5]
-    result = 87
+    result = 178
     population_count = 70
 
     solution = solve_diophantine_equation(coefs, result, population_count)
